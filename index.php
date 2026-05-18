@@ -47,20 +47,23 @@ $role = $_SESSION['role'];
         </header>
 
         <div class="bg-gradient-to-r from-blue-700 to-blue-800 p-8 rounded-2xl text-white shadow-lg mb-8">
-            <h3 class="text-2xl font-bold">Halo, <?= $username; ?>!</h3>
-            <p class="text-blue-100 mt-2 text-sm max-w-xl leading-relaxed">
-                Anda masuk sebagai <strong class="uppercase"><?= $role; ?></strong>. 
-                <?php 
-                if ($role == 'admin') {
-                    echo "Anda memiliki otoritas penuh untuk mengelola data barang, laporan, dan hak akses pengguna sistem.";
-                } elseif ($role == 'pengelola' || $role == 'pemilik') {
-                    echo "Anda bertugas untuk memantau ketersediaan stok menu dan mengawasi laporan pendapatan kantin secara berkala.";
-                } else {
-                    echo "Anda bertugas untuk melayani transaksi penjualan pelanggan di meja kasir secara cepat dan akurat.";
-                }
-                ?>
-            </p>
-        </div>
+    <h3 class="text-2xl font-bold">Halo, <?= $username; ?>!</h3>
+    <p class="text-blue-100 mt-2 text-sm max-w-xl leading-relaxed">
+        Anda masuk sebagai <strong class="uppercase"><?= $role; ?></strong>. 
+        <?php 
+        // Paksa cek menggunakan huruf kecil agar aman dari kapital database
+        $role_cek = strtolower($role);
+
+        if ($role_cek == 'admin') {
+            echo "Anda memiliki otoritas penuh untuk mengelola data barang, laporan, dan hak akses pengguna sistem.";
+        } elseif ($role_cek == 'pengelola' || $role_cek == 'pemilik') {
+            echo "Anda bertugas untuk memantau ketersediaan stok menu dan mengawasi laporan pendapatan kantin secara berkala.";
+        } else {
+            echo "Anda bertugas untuk melayani transaksi penjualan pelanggan di meja kasir secara cepat dan akurat.";
+        }
+        ?>
+    </p>
+</div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
