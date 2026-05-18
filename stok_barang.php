@@ -70,9 +70,13 @@ if (isset($_POST['tambah'])) {
                         <td class="p-4 text-sm text-center">
                             <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md font-bold"><?= $row['stok']; ?></span>
                         </td>
-                        <td class="p-4 text-center">
-                            <button class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
-                            <button class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        <td class="p-4 text-center flex justify-center gap-3">
+                            <button onclick="bukaModalEdit('<?= $row['id_barang']; ?>', '<?= addslashes($row['nama_barang']); ?>', '<?= $row['harga']; ?>', '<?= $row['stok']; ?>')" class="text-blue-500 hover:text-blue-700 transition">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <a href="modules/barang/aksi.php?hapus=<?= $row['id_barang']; ?>" onclick="return confirm('Yakin ingin menghapus menu <?= addslashes($row['nama_barang']); ?>?')" class="text-red-500 hover:text-red-700 transition">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     <?php } ?>
@@ -81,7 +85,7 @@ if (isset($_POST['tambah'])) {
         </div>
     </main>
 
-    <div id="modalTambah" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+    <div id="modalTambah" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-40">
         <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
             <h3 class="text-xl font-bold mb-4">Tambah Menu Baru</h3>
             <form action="" method="POST" class="space-y-4">
@@ -105,5 +109,39 @@ if (isset($_POST['tambah'])) {
         </div>
     </div>
 
+    <div id="modalEdit" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Edit Menu Barang</h3>
+            <form action="modules/barang/aksi.php" method="POST" class="space-y-4">
+                <input type="hidden" name="id_barang" id="edit_id">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700">Nama Produk</label>
+                    <input type="text" name="nama_produk" id="edit_nama" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700">Harga (Rp)</label>
+                    <input type="number" name="harga" id="edit_harga" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700">Jumlah Stok</label>
+                    <input type="number" name="stok" id="edit_stok" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required>
+                </div>
+                <div class="flex justify-end gap-3 mt-6">
+                    <button type="button" onclick="document.getElementById('modalEdit').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-bold">Batal</button>
+                    <button type="submit" name="edit" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function bukaModalEdit(id, nama, harga, stok) {
+            document.getElementById('edit_id').value = id;
+            document.getElementById('edit_nama').value = nama;
+            document.getElementById('edit_harga').value = harga;
+            document.getElementById('edit_stok').value = stok;
+            document.getElementById('modalEdit').classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
