@@ -21,7 +21,22 @@ include "config/db.php";
         <p class="text-xs text-blue-200 mt-1">Sistem Pemesanan Mandiri & Meja Digital</p>
     </header>
 
-    <main class="max-w-md mx-auto px-4 mt-6">
+    <div class="mb-6 px-4 max-w-md mx-auto mt-6">
+        <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                <i class="fas fa-search"></i>
+            </span>
+            <input 
+                type="text" 
+                id="searchMenu" 
+                placeholder="Cari makanan atau minuman..." 
+                class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-slate-700 transition-all"
+                onkeyup="cariMenu()"
+            >
+        </div>
+    </div>
+
+    <main class="max-w-md mx-auto px-4">
         
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 space-y-3">
             <h3 class="text-xs font-bold text-slate-600 uppercase tracking-wider"><i class="fas fa-user-edit text-blue-600"></i> Informasi Pelanggan</h3>
@@ -55,13 +70,13 @@ include "config/db.php";
 
             while ($row = mysqli_fetch_array($query)) {
             ?>
-            <div class="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex items-center justify-between hover:border-blue-300 transition duration-300">
+            <div class="card-menu bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex items-center justify-between hover:border-blue-300 transition duration-300">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
                         <i class="fas fa-hamburger text-sm"></i>
                     </div>
                     <div>
-                        <h3 class="font-bold text-slate-800 text-base capitalize"><?= $row['nama_barang']; ?></h3>
+                        <h3 class="nama-menu font-bold text-slate-800 text-base capitalize"><?= $row['nama_barang']; ?></h3>
                         <p class="text-xs text-slate-400 mt-0.5">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
                     </div>
                 </div>
@@ -89,6 +104,7 @@ include "config/db.php";
                     <span class="text-xs text-slate-400 block">Total Pesanan Kamu:</span>
                     <span class="text-lg font-black text-blue-700" id="label_total_pelanggan">Rp 0</span>
                 </div>
+
                 <div class="flex gap-2">
                     <button type="button" onclick="setMetode('TUNAI')" class="bg-slate-800 text-white text-xs font-bold px-3 py-2.5 rounded-lg hover:bg-slate-900 transition flex items-center gap-1">
                         <i class="fas fa-money-bill-wave"></i> Bayar Tunai
@@ -148,7 +164,6 @@ include "config/db.php";
 
             keranjangPelanggan.forEach(item => {
                 totalBelanja += item.subtotal;
-                // Generate input hidden dinamis agar bisa dibaca file PHP proses nanti
                 wrapper.innerHTML += `
                     <input type="hidden" name="id_barang_array[]" value="${item.id_barang}">
                     <input type="hidden" name="jumlah_array[]" value="${item.jumlah}">
@@ -174,6 +189,22 @@ include "config/db.php";
             } else {
                 if(confirm('Pesanan Anda akan dikirim ke dapur. Silakan bayar tunai sebesar Rp ' + totalBelanja.toLocaleString('id-ID') + ' ke loket kasir saat mengambil makanan. Kirim pesanan sekarang?')) {
                     document.getElementById('form_order').submit();
+                }
+            }
+        }
+
+        // FUNGSI PENCARIAN REAL-TIME
+        function cariMenu() {
+            let kataKunci = document.getElementById('searchMenu').value.toLowerCase();
+            let daftarKartu = document.getElementsByClassName('card-menu');
+            
+            for (let i = 0; i < daftarKartu.length; i++) {
+                let namaMakanan = daftarKartu[i].getElementsByClassName('nama-menu')[0].innerText.toLowerCase();
+                
+                if (namaMakanan.includes(kataKunci)) {
+                    daftarKartu[i].style.display = ""; 
+                } else {
+                    daftarKartu[i].style.display = "none"; 
                 }
             }
         }
