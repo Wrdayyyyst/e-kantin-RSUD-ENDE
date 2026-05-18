@@ -58,7 +58,7 @@ if (isset($_POST['login'])) {
         </form>
         
         <p class="text-center text-slate-400 text-xs mt-8">
-            &copy; 2026 MAKN Ende - Pengembangan Perangkat Lunak dan Gim
+            &copy; 2026 MAKN Ende.
         </p>
     </div>
 </body>
