@@ -6,6 +6,10 @@ if ($current_dir == 'barang' || $current_dir == 'laporan' || $current_dir == 'tr
 } else {
     $path = ""; // Jika di folder terluar (root)
 }
+
+// TRIK SAKTI: Paksa isi variabel $role menjadi huruf kecil semua 
+// Supaya kodingan di bawah tidak sensitif terhadap huruf kapital database
+$role_aman = isset($role) ? strtolower($role) : '';
 ?>
 
 <aside class="w-64 bg-[#0f172a] text-white flex flex-col shadow-xl sticky top-0 h-screen no-print">
@@ -19,13 +23,13 @@ if ($current_dir == 'barang' || $current_dir == 'laporan' || $current_dir == 'tr
             <i class="fas fa-home w-5 text-center"></i> Dashboard
         </a>
         
-        <?php if ($role == 'admin' || $role == 'kasir') : ?>
-        <a href="<?= $path; ?>transaksi.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
-            <i class="fas fa-shopping-cart w-5 text-center"></i> Transaksi Baru
+        <?php if ($role_aman == 'admin' || $role_aman == 'kasir') : ?>
+        <a href="<?= $path; ?>pesanan_masuk.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm font-medium text-slate-400 hover:text-white">
+            <i class="fas fa-shopping-basket w-5 text-center"></i> Pesanan Masuk
         </a>
         <?php endif; ?>
 
-        <?php if ($role == 'admin' || $role == 'pengelola' || $role == 'pemilik') : ?>
+        <?php if ($role_aman == 'admin' || $role_aman == 'pengelola' || $role_aman == 'pemilik') : ?>
         <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-3 tracking-widest">Manajemen Data</div>
         
         <a href="<?= $path; ?>stok_barang.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg text-sm text-slate-400 hover:text-white transition">
@@ -37,7 +41,7 @@ if ($current_dir == 'barang' || $current_dir == 'laporan' || $current_dir == 'tr
         </a>
         <?php endif; ?>
 
-        <?php if ($role == 'admin') : ?>
+        <?php if ($role_aman == 'admin') : ?>
         <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-3 tracking-widest">Sistem</div>
         <a href="<?= $path; ?>users.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
             <i class="fas fa-user-cog w-5 text-center"></i> Kelola User

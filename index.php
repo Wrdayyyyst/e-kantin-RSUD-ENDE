@@ -1,13 +1,20 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['status'])) { header("location:login.php"); exit; }
-include "config/db.php";
-$role = strtolower($_SESSION['role']);
-$username = $_SESSION['username'];
-$base_path = "./"; // Karena berada di root
-?>
+if (!isset($_SESSION['status'])) { 
+    header("location:login.php"); 
+    exit; 
+}
 
+include "config/db.php";
+/** @var mysqli $conn */
+
+
+$username = $_SESSION['username'];
+$base_path = "./"; 
+
+$role = $_SESSION['role']; 
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
