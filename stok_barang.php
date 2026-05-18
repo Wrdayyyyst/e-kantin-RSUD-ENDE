@@ -21,6 +21,7 @@ if (isset($_POST['tambah'])) {
     
     mysqli_query($conn, "INSERT INTO barang (nama_barang, harga, stok) VALUES ('$nama', '$harga', '$stok')");
     header("location:stok_barang.php");
+    exit;
 }
 ?>
 
@@ -34,49 +35,8 @@ if (isset($_POST['tambah'])) {
 </head>
 <body class="bg-slate-50 flex min-h-screen">
 
-    <aside class="w-64 bg-[#0f172a] text-white flex flex-col shadow-xl sticky top-0 h-screen z-50">
-    <div class="p-6 text-center border-b border-slate-800">
-        <h1 class="text-2xl font-bold tracking-widest text-blue-400">e-KANTIN</h1>
-        <p class="text-[10px] text-slate-400 uppercase tracking-widest">RSUD Ende</p>
-    </div>
+    <?php include "layout/sidebar.php"; ?>
 
-    <nav class="flex-1 mt-6 px-4 space-y-1">
-        <a href="index.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
-            <i class="fas fa-home w-5 text-center"></i> Dashboard
-        </a>
-        
-        <?php if ($role == 'admin' || $role == 'kasir') : ?>
-        <a href="transaksi.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
-            <i class="fas fa-shopping-cart w-5 text-center"></i> Transaksi Baru
-        </a>
-        <?php endif; ?>
-
-        <?php if ($role == 'admin' || $role == 'pengelola' || $role == 'pemilik') : ?>
-        <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-3 tracking-widest">Manajemen Data</div>
-        
-        <a href="stok_barang.php" class="flex items-center gap-3 p-3 bg-blue-600 rounded-lg transition text-sm font-medium text-white shadow-lg shadow-blue-900/20">
-            <i class="fas fa-box w-5 text-center"></i> Stok Barang
-        </a>
-        
-        <a href="laporan.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
-            <i class="fas fa-chart-bar w-5 text-center"></i> Laporan
-        </a>
-        <?php endif; ?>
-
-        <?php if ($role == 'admin') : ?>
-        <div class="pt-6 pb-2 text-[10px] font-bold text-slate-500 uppercase px-3 tracking-widest">Sistem</div>
-        <a href="users.php" class="flex items-center gap-3 p-3 hover:bg-slate-800 rounded-lg transition text-sm text-slate-400 hover:text-white">
-            <i class="fas fa-user-cog w-5 text-center"></i> Kelola User
-        </a>
-        <?php endif; ?>
-    </nav>
-
-    <div class="p-4 border-t border-slate-800">
-        <a href="logout.php" onclick="return confirm('Yakin ingin keluar?')" class="flex items-center gap-3 p-3 bg-red-500/10 text-red-500 hover:bg-red-600 hover:text-white rounded-lg transition text-sm font-bold justify-center">
-            <i class="fas fa-power-off"></i> Logout
-        </a>
-    </div>
-</aside>
     <main class="flex-1 p-8">
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-2xl font-bold text-slate-800 uppercase">Manajemen Stok Barang</h2>
@@ -100,7 +60,8 @@ if (isset($_POST['tambah'])) {
                 <tbody class="divide-y divide-slate-100">
                     <?php 
                     $no = 1;
-                    $data = mysqli_query($conn, "SELECT * FROM barang");                    while($row = mysqli_fetch_array($data)) {
+                    $data = mysqli_query($conn, "SELECT * FROM barang"); 
+                    while($row = mysqli_fetch_array($data)) {
                     ?>
                     <tr class="hover:bg-slate-50 transition">
                         <td class="p-4 text-sm text-slate-600"><?= $no++; ?></td>
