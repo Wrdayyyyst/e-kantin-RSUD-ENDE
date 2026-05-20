@@ -32,7 +32,7 @@ include "config/db.php";
     <main class="flex-1 p-8">
         <div class="flex justify-between items-center mb-8">
             <div>
-                <h2 class="text-2xl font-bold text-slate-800 uppercase">Kelola Pengguna / User</h2>
+                <h2 class="text-2xl font-bold text-slate-800 uppercase tracking-wide">Kelola Pengguna / User</h2>
                 <p class="text-slate-500 text-xs">Manajemen hak akses akun aplikasi e-Kantin RSUD Ende</p>
             </div>
             
@@ -45,7 +45,7 @@ include "config/db.php";
             <table class="w-full text-left border-collapse">
                 <thead class="bg-slate-100 border-b border-slate-200">
                     <tr>
-                        <th class="p-4 text-xs font-bold text-slate-500 uppercase">No</th>
+                        <th class="p-4 w-12 text-center text-xs font-bold text-slate-500 uppercase">No</th>
                         <th class="p-4 text-xs font-bold text-slate-500 uppercase">Username</th>
                         <th class="p-4 text-xs font-bold text-slate-500 uppercase">Hak Akses / Role</th>
                         <th class="p-4 text-xs font-bold text-slate-500 uppercase text-center">Aksi</th>
@@ -54,11 +54,12 @@ include "config/db.php";
                 <tbody class="divide-y divide-slate-100">
                     <?php 
                     $no = 1;
+                    // Mengambil data user paling segar dari database secara urut
                     $query = mysqli_query($conn, "SELECT * FROM users ORDER BY role ASC, username ASC"); 
                     while($row = mysqli_fetch_array($query)) {
                     ?>
                     <tr class="hover:bg-slate-50 transition">
-                        <td class="p-4 text-sm text-slate-600"><?= $no++; ?></td>
+                        <td class="p-4 text-center text-sm text-slate-400 font-bold"><?= $no++; ?></td>
                         <td class="p-4 text-sm font-bold text-slate-800 flex items-center gap-2">
                             <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold">
                                 <?= strtoupper(substr($row['username'], 0, 2)); ?>
@@ -72,7 +73,7 @@ include "config/db.php";
                             </span>
                         </td>
                         <td class="p-4 text-center flex justify-center gap-3">
-                            <button onclick="bukaModalEditUser('<?= $row['id_user']; ?>', '<?= addslashes($row['username']); ?>', '<?= $row['role']; ?>')" class="text-blue-500 hover:text-blue-700 transition">
+                            <button onclick="bukaModalEditUser('<?= $row['id_user']; ?>', '<?= addslashes($row['username']); ?>', '<?= strtolower($row['role']); ?>')" class="text-blue-500 hover:text-blue-700 transition">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <a href="modules/user/aksi.php?hapus=<?= $row['id_user']; ?>" onclick="return confirm('Yakin ingin menghapus pengguna <?= addslashes($row['username']); ?>?')" class="text-red-500 hover:text-red-700 transition">
@@ -88,7 +89,7 @@ include "config/db.php";
 
     <div id="modalTambahUser" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">Tambah Pengguna Baru</h3>
+            <h3 class="text-xl font-bold mb-4 text-slate-800">Tambah Pengguna Baru</h3>
             <form action="modules/user/aksi.php" method="POST" class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Username</label>
@@ -100,16 +101,15 @@ include "config/db.php";
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Role / Hak Akses</label>
-                    <select name="role" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white" required>
+                    <select name="role" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-slate-700" required>
                         <option value="kasir">Kasir</option>
-                        <option value="pengelola">Pengelola</option>
                         <option value="pemilik">Pemilik</option>
                         <option value="admin">Admin</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="document.getElementById('modalTambahUser').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-bold">Batal</button>
-                    <button type="submit" name="tambah_user" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">Simpan User</button>
+                    <button type="button" onclick="document.getElementById('modalTambahUser').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-bold text-sm">Batal</button>
+                    <button type="submit" name="tambah_user" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 text-sm shadow-md">Simpan User</button>
                 </div>
             </form>
         </div>
@@ -117,7 +117,7 @@ include "config/db.php";
 
     <div id="modalEditUser" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">Edit Data Pengguna</h3>
+            <h3 class="text-xl font-bold mb-4 text-slate-800">Edit Data Pengguna</h3>
             <form action="modules/user/aksi.php" method="POST" class="space-y-4">
                 <input type="hidden" name="id_user" id="edit_id_user">
                 <div>
@@ -130,16 +130,15 @@ include "config/db.php";
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Role / Hak Akses</label>
-                    <select name="role" id="edit_role_user" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white" required>
+                    <select name="role" id="edit_role_user" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-slate-700" required>
                         <option value="kasir">Kasir</option>
-                        <option value="pengelola">Pengelola</option>
                         <option value="pemilik">Pemilik</option>
                         <option value="admin">Admin</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-bold">Batal</button>
-                    <button type="submit" name="edit_user" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700">Simpan Perubahan</button>
+                    <button type="button" onclick="document.getElementById('modalEditUser').classList.add('hidden')" class="px-4 py-2 text-slate-500 font-bold text-sm">Batal</button>
+                    <button type="submit" name="edit_user" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 text-sm shadow-md">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -149,7 +148,11 @@ include "config/db.php";
         function bukaModalEditUser(id, username, role) {
             document.getElementById('edit_id_user').value = id;
             document.getElementById('edit_username').value = username;
-            document.getElementById('edit_role_user').value = role;
+            
+            // Mengunci otomatis dropdown select agar sesuai dengan role bawaan di database
+            document.getElementById('edit_role_user').value = role.toLowerCase();
+            
+            // Tampilkan modal edit
             document.getElementById('modalEditUser').classList.remove('hidden');
         }
     </script>

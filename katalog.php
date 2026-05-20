@@ -56,54 +56,60 @@ include "config/db.php";
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider">Silakan Pilih & Tekan Menu :</h2>
         </div>
 
-        <div class="space-y-4">
-            <?php
-            $query = mysqli_query($conn, "SELECT * FROM barang WHERE stok > 0 ORDER BY nama_barang ASC");
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <?php
+    $query = mysqli_query($conn, "SELECT * FROM barang WHERE stok > 0 ORDER BY nama_barang ASC");
+    
+    if (mysqli_num_rows($query) == 0) {
+        echo '
+        <div class="col-span-full bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm">
+            <i class="fas fa-cookie-bite text-slate-300 text-4xl mb-3"></i>
+            <p class="text-slate-500 font-medium text-sm">Mohon maaf, semua menu makanan saat ini sedang habis.</p>
+        </div>';
+    }
+
+    while ($row = mysqli_fetch_array($query)) {
+        $gambar = (!empty($row['foto'])) ? 'assets/img/' . $row['foto'] : '';
+    ?>
+    
+    <div class="card-menu bg-white rounded-2xl border border-slate-150 shadow-sm overflow-hidden flex flex-col justify-between hover:border-blue-300 transition duration-300">
+        
+        <div class="w-full h-36 bg-slate-100 relative overflow-hidden border-b border-slate-100 flex items-center justify-center">
+            <?php if(!empty($gambar) && file_exists($gambar)): ?>
+                <img src="<?= $gambar; ?>" class="w-full h-full object-cover" alt="<?= $row['nama_barang']; ?>">
+            <?php else: ?>
+                <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60" class="w-full h-full object-cover brightness-95" alt="Ilustrasi Makanan">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+            <?php endif; ?>
             
-            if (mysqli_num_rows($query) == 0) {
-                echo '
-                <div class="bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm">
-                    <i class="fas fa-cookie-bite text-slate-300 text-4xl mb-3"></i>
-                    <p class="text-slate-500 font-medium text-sm">Mohon maaf, semua menu makanan saat ini sedang habis.</p>
-                </div>';
-            }
-
-            while ($row = mysqli_fetch_array($query)) {
-                $gambar = (!empty($row['foto'])) ? 'assets/img/' . $row['foto'] : '';
-            ?>
-            
-            <div class="card-menu bg-white rounded-2xl border border-slate-150 shadow-sm p-3 flex gap-3 hover:border-blue-300 transition duration-300">
-                
-                <div class="w-20 h-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden flex items-center justify-center border border-slate-100">
-                    <?php if(!empty($gambar) && file_exists($gambar)): ?>
-                        <img src="<?= $gambar; ?>" class="w-full h-full object-cover" alt="Menu">
-                    <?php else: ?>
-                        <div class="text-blue-600 text-2xl font-bold">
-                            <i class="fas fa-hamburger"></i>
-                        </div>
-                    <?php endif; ?>
-                </div>
-
-                <div class="flex flex-col justify-between flex-grow">
-                    <div>
-                        <h3 class="nama-menu font-bold text-slate-800 text-base capitalize leading-tight"><?= $row['nama_barang']; ?></h3>
-                        <p class="text-xs text-slate-400 font-medium mt-1">Stok Tersedia: <?= $row['stok']; ?></p>
-                    </div>
-                    
-                    <div class="flex items-center justify-between mt-2">
-                        <span class="text-sm font-black text-blue-700">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></span>
-                        
-                        <div id="btn-container-<?= $row['id_barang']; ?>">
-                            <button type="button" onclick="tambahPorsi('<?= $row['id_barang']; ?>', '<?= $row['nama_barang']; ?>', <?= $row['harga']; ?>, <?= $row['stok']; ?>)" class="bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center gap-1">
-                                <i class="fas fa-plus text-[10px]"></i> Pesan
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <?php } ?>
+            <span class="absolute top-2 right-2 bg-slate-900/70 backdrop-blur-xs text-[10px] font-bold text-white px-2 py-0.5 rounded-md">
+                Stok: <?= $row['stok']; ?>
+            </span>
         </div>
+
+        <div class="p-3 flex flex-col justify-between flex-grow space-y-3">
+            <div>
+                <h3 class="nama-menu font-bold text-slate-800 text-sm capitalize line-clamp-2 min-h-[40px] leading-tight">
+                    <?= $row['nama_barang']; ?>
+                </h3>
+            </div>
+            
+            <div class="space-y-2 mt-auto">
+                <div class="text-sm font-black text-blue-700 block">
+                    Rp <?= number_format($row['harga'], 0, ',', '.'); ?>
+                </div>
+                
+                <div id="btn-container-<?= $row['id_barang']; ?>" class="w-full">
+                    <button type="button" onclick="tambahPorsi('<?= $row['id_barang']; ?>', '<?= $row['nama_barang']; ?>', <?= $row['harga']; ?>, <?= $row['stok']; ?>)" class="w-full bg-blue-600 text-white text-xs font-bold py-2 rounded-xl hover:bg-blue-700 transition shadow-sm flex items-center justify-center gap-1">
+                        <i class="fas fa-plus text-[9px]"></i> Pesan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <?php } ?>
+</div>
     </main>
 
     <form id="form_order" action="modules/transaksi/aksi_pelanggan.php" method="POST">

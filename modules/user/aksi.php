@@ -14,22 +14,26 @@ if ($role !== 'admin') {
     exit;
 }
 
-// 1. LOGIKA TAMBAH USER (POST)
+// 1. LOGIKA TAMBAH USER (POST) - FIXED BUG ROLE
 if (isset($_POST['tambah_user'])) {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $password = md5($_POST['password']); // Menggunakan MD5 sesuai standard login biasa
-    $role_user = strtolower($_SESSION['role']); // Ambil role pilihan dari form
+    $password = md5($_POST['password']); 
+    
+    // PERBAIKAN: Mengambil data role dari input form POST, bukan dari session admin!
+    $role_user = strtolower($_POST['role']); 
 
     mysqli_query($conn, "INSERT INTO users (username, password, role) VALUES ('$username', '$password', '$role_user')");
-    header("location:../../users.php");
+    
+    // Redirect kembali ke halaman kelola user utama
+    header("location: index.php");
     exit;
 }
 
 // 2. LOGIKA EDIT USER (POST)
 if (isset($_POST['edit_user'])) {
-    $id_user  = $_POST['id_user'];
-    $username = mysqli_real_escape_string($conn, $_POST['username']);
-    $role_user = $_POST['role'];
+    $id_user   = $_POST['id_user'];
+    $username  = mysqli_real_escape_string($conn, $_POST['username']);
+    $role_user = strtolower($_POST['role']);
 
     // Jika password diisi, ganti password lama. Jika kosong, biarkan password lama.
     if (!empty($_POST['password'])) {
@@ -39,7 +43,7 @@ if (isset($_POST['edit_user'])) {
         mysqli_query($conn, "UPDATE users SET username = '$username', role = '$role_user' WHERE id_user = '$id_user'");
     }
 
-    header("location:../../users.php");
+    header("location: index.php");
     exit;
 }
 
@@ -53,12 +57,12 @@ if (isset($_GET['hapus'])) {
     $data_user = mysqli_fetch_assoc($cek_user);
 
     if ($data_user['username'] == $user_sekarang) {
-        echo "<script>alert('Anda tidak bisa menghapus akun Anda sendiri yang sedang aktif!'); window.location='../../users.php';</script>";
+        echo "<script>alert('Anda tidak bisa menghapus akun Anda sendiri yang sedang aktif!'); window.location='index.php';</script>";
         exit;
     }
 
     mysqli_query($conn, "DELETE FROM users WHERE id_user = '$id_user'");
-    header("location:../../users.php");
+    header("location: index.php");
     exit;
 }
 ?>
