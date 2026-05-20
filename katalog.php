@@ -12,7 +12,7 @@ include "config/db.php";
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-32">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-48">
 
     <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md sticky top-0 z-50 px-4 py-5 text-center rounded-b-2xl">
         <h1 class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 uppercase">
@@ -69,23 +69,38 @@ include "config/db.php";
             }
 
             while ($row = mysqli_fetch_array($query)) {
+                $gambar = (!empty($row['foto'])) ? 'assets/img/' . $row['foto'] : '';
             ?>
-            <div class="card-menu bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex items-center justify-between hover:border-blue-300 transition duration-300">
-                <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
-                        <i class="fas fa-hamburger text-sm"></i>
-                    </div>
-                    <div>
-                        <h3 class="nama-menu font-bold text-slate-800 text-base capitalize"><?= $row['nama_barang']; ?></h3>
-                        <p class="text-xs text-slate-400 mt-0.5">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></p>
-                    </div>
-                </div>
+            
+            <div class="card-menu bg-white rounded-2xl border border-slate-150 shadow-sm p-3 flex gap-3 hover:border-blue-300 transition duration-300">
                 
-                <div class="text-right">
-                    <button type="button" onclick="pilihMenu('<?= $row['id_barang']; ?>', '<?= $row['nama_barang']; ?>', <?= $row['harga']; ?>, <?= $row['stok']; ?>)" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm">
-                        <i class="fas fa-plus"></i> Pesan
-                    </button>
+                <div class="w-20 h-20 rounded-xl bg-slate-100 flex-shrink-0 overflow-hidden flex items-center justify-center border border-slate-100">
+                    <?php if(!empty($gambar) && file_exists($gambar)): ?>
+                        <img src="<?= $gambar; ?>" class="w-full h-full object-cover" alt="Menu">
+                    <?php else: ?>
+                        <div class="text-blue-600 text-2xl font-bold">
+                            <i class="fas fa-hamburger"></i>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <div class="flex flex-col justify-between flex-grow">
+                    <div>
+                        <h3 class="nama-menu font-bold text-slate-800 text-base capitalize leading-tight"><?= $row['nama_barang']; ?></h3>
+                        <p class="text-xs text-slate-400 font-medium mt-1">Stok Tersedia: <?= $row['stok']; ?></p>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-sm font-black text-blue-700">Rp <?= number_format($row['harga'], 0, ',', '.'); ?></span>
+                        
+                        <div id="btn-container-<?= $row['id_barang']; ?>">
+                            <button type="button" onclick="tambahPorsi('<?= $row['id_barang']; ?>', '<?= $row['nama_barang']; ?>', <?= $row['harga']; ?>, <?= $row['stok']; ?>)" class="bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center gap-1">
+                                <i class="fas fa-plus text-[10px]"></i> Pesan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <?php } ?>
         </div>
@@ -98,24 +113,33 @@ include "config/db.php";
         <input type="hidden" name="metode_pembayaran" id="form_metode">
         <div id="wrapper_input_barang"></div>
 
-        <div id="floating_cart" class="hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 shadow-[0_-5px_20px_rgba(0,0,0,0.05)] p-4 rounded-t-2xl z-50">
-            <div class="flex justify-between items-center mb-3">
+        <div id="floating_cart" class="hidden fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] p-4 rounded-t-3xl z-50 transition-all duration-300">
+            
+            <div class="flex items-center gap-2 text-slate-700 font-bold text-xs uppercase tracking-wider mb-2 pb-2 border-b">
+                <i class="fas fa-shopping-basket text-blue-600"></i> Rincian Pesanan Anda
+            </div>
+
+            <div id="detail_keranjang_list" class="max-h-32 overflow-y-auto space-y-2 mb-4 pr-1 text-xs text-slate-600">
+                </div>
+
+            <div class="flex justify-between items-center pt-1">
                 <div>
-                    <span class="text-xs text-slate-400 block">Total Pesanan Kamu:</span>
+                    <span class="text-[10px] text-slate-400 block font-semibold uppercase">Total Bayar:</span>
                     <span class="text-lg font-black text-blue-700" id="label_total_pelanggan">Rp 0</span>
                 </div>
 
                 <div class="flex gap-2">
-                    <button type="button" onclick="setMetode('TUNAI')" class="bg-slate-800 text-white text-xs font-bold px-3 py-2.5 rounded-lg hover:bg-slate-900 transition flex items-center gap-1">
-                        <i class="fas fa-money-bill-wave"></i> Bayar Tunai
+                    <button type="button" onclick="setMetode('TUNAI')" class="bg-slate-800 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-slate-900 transition flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-money-bill-wave"></i> Tunai
                     </button>
-                    <button type="button" onclick="setMetode('QRIS')" class="bg-emerald-600 text-white text-xs font-bold px-3 py-2.5 rounded-lg hover:bg-emerald-700 transition flex items-center gap-1">
-                        <i class="fas fa-qrcode"></i> Scan QRIS
+                    <button type="button" onclick="setMetode('QRIS')" class="bg-emerald-600 text-white text-xs font-bold px-3 py-2.5 rounded-xl hover:bg-emerald-700 transition flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-qrcode"></i> QRIS
                     </button>
                 </div>
             </div>
-            <div class="text-[10px] text-slate-400 border-t pt-2 text-center" id="instruksi_pembayaran">
-                Silakan pilih metode pembayaran untuk mengirimkan pesanan ke dapur.
+            
+            <div class="text-[9px] text-slate-400 mt-2 text-center" id="instruksi_pembayaran">
+                Pastikan nama, nomor meja, dan daftar pesanan Anda sudah benar sebelum membayar.
             </div>
         </div>
     </form>
@@ -124,7 +148,8 @@ include "config/db.php";
         let keranjangPelanggan = [];
         let totalBelanja = 0;
 
-        function pilihMenu(id_barang, nama, harga, stokMax) {
+        // Fungsi Tambah Porsi
+        function tambahPorsi(id_barang, nama, harga, stokMax) {
             const namaInput = document.getElementById('nama_pemesan').value.trim();
             const mejaInput = document.getElementById('nomor_meja').value.trim();
 
@@ -134,6 +159,7 @@ include "config/db.php";
             }
 
             const indeksAda = keranjangPelanggan.findIndex(item => item.id_barang === id_barang);
+            
             if(indeksAda > -1) {
                 if(keranjangPelanggan[indeksAda].jumlah >= stokMax) {
                     alert('Maaf, sisa porsi yang ada di dapur sudah maksimal!');
@@ -142,18 +168,75 @@ include "config/db.php";
                 keranjangPelanggan[indeksAda].jumlah += 1;
                 keranjangPelanggan[indeksAda].subtotal = keranjangPelanggan[indeksAda].jumlah * harga;
             } else {
-                keranjangPelanggan.push({ id_barang, nama, harga, jumlah: 1, subtotal: harga });
+                keranjangPelanggan.push({ id_barang, nama, harga, jumlah: 1, subtotal: harga, stokMax: stokMax });
             }
 
-            hitungTotalPelanggan();
+            perbaruiSemuaUI(id_barang, nama, harga, stokMax);
         }
 
-        function hitungTotalPelanggan() {
+        // Fungsi Kurang Porsi
+        function kurangPorsi(id_barang, nama, harga, stokMax) {
+            const indeksAda = keranjangPelanggan.findIndex(item => item.id_barang === id_barang);
+            
+            if(indeksAda > -1) {
+                keranjangPelanggan[indeksAda].jumlah -= 1;
+                keranjangPelanggan[indeksAda].subtotal = keranjangPelanggan[indeksAda].jumlah * harga;
+                
+                if(keranjangPelanggan[indeksAda].jumlah <= 0) {
+                    keranjangPelanggan.splice(indeksAda, 1);
+                }
+            }
+
+            perbaruiSemuaUI(id_barang, nama, harga, stokMax);
+        }
+
+        // PERBAIKAN BARU: Fungsi Batal/Cancel Menu Langsung (Hapus total satu baris menu)
+        function batalkanMenu(id_barang, nama, harga, stokMax) {
+            const indeksAda = keranjangPelanggan.findIndex(item => item.id_barang === id_barang);
+            
+            if(indeksAda > -1) {
+                if(confirm(`Apakah Anda yakin ingin membatalkan pesanan ${nama}?`)) {
+                    keranjangPelanggan.splice(indeksAda, 1);
+                    perbaruiSemuaUI(id_barang, nama, harga, stokMax);
+                }
+            }
+        }
+
+        // Fungsi Menyelaraskan UI Tombol Atas dan Isi Keranjang Bawah Sekaligus
+        function perbaruiSemuaUI(id_barang, nama, harga, stokMax) {
+            const container = document.getElementById(`btn-container-${id_barang}`);
+            const item = keranjangPelanggan.find(item => item.id_barang === id_barang);
+
+            if(container) {
+                if(item && item.jumlah > 0) {
+                    container.innerHTML = `
+                        <div class="flex items-center border border-blue-200 bg-blue-50 rounded-lg overflow-hidden shadow-sm">
+                            <button type="button" onclick="kurangPorsi('${id_barang}', '${nama}', ${harga}, ${stokMax})" class="px-2.5 py-1 bg-white text-blue-600 hover:bg-slate-100 font-black transition text-xs">-</button>
+                            <span class="px-3 font-bold text-blue-700 text-xs">${item.jumlah}</span>
+                            <button type="button" onclick="tambahPorsi('${id_barang}', '${nama}', ${harga}, ${stokMax})" class="px-2.5 py-1 bg-white text-blue-600 hover:bg-slate-100 font-black transition text-xs">+</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <button type="button" onclick="tambahPorsi('${id_barang}', '${nama}', ${harga}, ${stokMax})" class="bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-lg hover:bg-blue-700 transition shadow-sm flex items-center gap-1">
+                            <i class="fas fa-plus text-[10px]"></i> Pesan
+                        </button>
+                    `;
+                }
+            }
+
+            hitungTotalDanRenderKeranjang();
+        }
+
+        // Fungsi Render List Rincian + Tombol Plus Minus + Tombol Cancel Di Dalam Floating Cart
+        function hitungTotalDanRenderKeranjang() {
             const cartBar = document.getElementById('floating_cart');
             const wrapper = document.getElementById('wrapper_input_barang');
+            const listDetail = document.getElementById('detail_keranjang_list');
             
             totalBelanja = 0;
             wrapper.innerHTML = '';
+            listDetail.innerHTML = '';
 
             if(keranjangPelanggan.length === 0) {
                 cartBar.classList.add('hidden');
@@ -164,9 +247,31 @@ include "config/db.php";
 
             keranjangPelanggan.forEach(item => {
                 totalBelanja += item.subtotal;
+                
+                // Input hidden bawaan untuk file action proses PHP asli
                 wrapper.innerHTML += `
                     <input type="hidden" name="id_barang_array[]" value="${item.id_barang}">
                     <input type="hidden" name="jumlah_array[]" value="${item.jumlah}">
+                `;
+
+                // Render Item dengan Tombol Cancel Merah di sisi paling kanan
+                listDetail.innerHTML += `
+                    <div class="flex justify-between items-center bg-slate-50 p-2 rounded-xl border border-slate-200 shadow-sm gap-2">
+                        <div class="flex flex-col flex-grow">
+                            <span class="font-bold capitalize text-slate-800 text-sm">${item.nama}</span>
+                            <span class="text-blue-600 font-extrabold text-[11px] mt-0.5">Rp ${item.subtotal.toLocaleString('id-ID')}</span>
+                        </div>
+                        
+                        <div class="flex items-center border border-slate-300 bg-white rounded-lg overflow-hidden shadow-xs flex-shrink-0">
+                            <button type="button" onclick="kurangPorsi('${item.id_barang}', '${item.nama}', ${item.harga}, ${item.stokMax})" class="px-2 py-0.5 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black text-xs transition">-</button>
+                            <span class="px-2.5 font-bold text-slate-800 text-xs">${item.jumlah}</span>
+                            <button type="button" onclick="tambahPorsi('${item.id_barang}', '${item.nama}', ${item.harga}, ${item.stokMax})" class="px-2 py-0.5 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black text-xs transition">+</button>
+                        </div>
+
+                        <button type="button" onclick="batalkanMenu('${item.id_barang}', '${item.nama}', ${item.harga}, ${item.stokMax})" class="w-7 h-7 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center justify-center text-xs flex-shrink-0" title="Batalkan Menu">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                 `;
             });
 
@@ -174,6 +279,7 @@ include "config/db.php";
             document.getElementById('form_total').value = totalBelanja;
         }
 
+        // Fungsi Kirim Form ke DB
         function setMetode(metode) {
             const namaInput = document.getElementById('nama_pemesan').value.trim();
             const mejaInput = document.getElementById('nomor_meja').value.trim();
@@ -182,18 +288,23 @@ include "config/db.php";
             document.getElementById('form_meja').value = mejaInput;
             document.getElementById('form_metode').value = metode;
 
+            let ringkasanTeks = "";
+            keranjangPelanggan.forEach(item => {
+                ringkasanTeks += `\n- ${item.nama} (x${item.jumlah}) : Rp ${item.subtotal.toLocaleString('id-ID')}`;
+            });
+
             if (metode === 'QRIS') {
-                if(confirm('Pesanan Anda akan dikirim ke dapur. Silakan lakukan scan pada stiker QRIS FISIK yang berada di meja/kasir sebesar Rp ' + totalBelanja.toLocaleString('id-ID') + '. Apakah Anda sudah paham?')) {
+                if(confirm(`Rincian Pesanan Kamu:${ringkasanTeks}\n\nTotal: Rp ${totalBelanja.toLocaleString('id-ID')}\n\nPesanan akan dikirim ke dapur. Silakan lakukan scan pada stiker QRIS FISIK yang berada di meja/kasir. Apakah Anda sudah paham?`)) {
                     document.getElementById('form_order').submit();
                 }
             } else {
-                if(confirm('Pesanan Anda akan dikirim ke dapur. Silakan bayar tunai sebesar Rp ' + totalBelanja.toLocaleString('id-ID') + ' ke loket kasir saat mengambil makanan. Kirim pesanan sekarang?')) {
+                if(confirm(`Rincian Pesanan Kamu:${ringkasanTeks}\n\nTotal: Rp ${totalBelanja.toLocaleString('id-ID')}\n\nPesanan akan dikirim ke dapur. Silakan lakukan pembayaran tunai ke loket kasir saat mengambil makanan. Kirim pesanan sekarang?`)) {
                     document.getElementById('form_order').submit();
                 }
             }
         }
 
-        // FUNGSI PENCARIAN REAL-TIME
+        // Fungsi Pencarian Menu Real-Time
         function cariMenu() {
             let kataKunci = document.getElementById('searchMenu').value.toLowerCase();
             let daftarKartu = document.getElementsByClassName('card-menu');
@@ -202,7 +313,7 @@ include "config/db.php";
                 let namaMakanan = daftarKartu[i].getElementsByClassName('nama-menu')[0].innerText.toLowerCase();
                 
                 if (namaMakanan.includes(kataKunci)) {
-                    daftarKartu[i].style.display = ""; 
+                    daftarKartu[i].style.display = "flex"; 
                 } else {
                     daftarKartu[i].style.display = "none"; 
                 }

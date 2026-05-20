@@ -4,7 +4,7 @@ include "config/db.php";
 /** @var mysqli $conn */
 
 // 1. Proteksi login kasir/admin
-if (!isset($_SESSION['status']) || $_SESSION['status'] != "login") {
+if (!isset($_SESSION['status']) || $_SESSION['status'] !== "login") {
     header("location:login.php");
     exit;
 }
@@ -54,7 +54,6 @@ $role = $_SESSION['role'];
 
             while($t = mysqli_fetch_assoc($query_transaksi)) {
                 $id_trx = $t['id_transaksi'];
-                // Atur warna label status biar kasir mudah membedakan
                 $bg_status = ($t['status_pesanan'] == 'Pending') ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-blue-100 text-blue-700 border-blue-200';
             ?>
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition duration-300">
@@ -73,12 +72,29 @@ $role = $_SESSION['role'];
                         <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Menu Dipesan:</span>
                         <ul class="text-sm text-slate-600 space-y-2 max-h-36 overflow-y-auto pr-1">
                             <?php
-                            // Relasikan detail_transaksi dengan tabel barang untuk memunculkan nama makanannya
+                            // Cek opsi 1: Cari di tabel detail_transaksi terlebih dahulu
                             $query_detail = mysqli_query($conn, "SELECT d.*, b.nama_barang FROM detail_transaksi d JOIN barang b ON d.id_barang = b.id_barang WHERE d.id_transaksi = '$id_trx'");
-                            while($d = mysqli_fetch_assoc($query_detail)) {
-                                echo "<li class='flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100'>
-                                        <span class='font-medium capitalize text-slate-700'>".$d['nama_barang']." <b class='text-blue-700 font-black ml-1'>x".$d['jumlah']."</b></span>
-                                        <span class='text-slate-500 text-xs font-bold'>Rp ".number_format($d['subtotal'], 0, ',', '.')."</span>
+                            
+                            if(mysqli_num_rows($query_detail) > 0) {
+                                // Jika tabel relasi detail berfungsi, tampilkan dari sini
+                                while($d = mysqli_fetch_assoc($query_detail)) {
+                                    echo "<li class='flex justify-between items-center bg-slate-50 p-2 rounded-lg border border-slate-100'>
+                                            <span class='font-bold capitalize text-slate-700'>".$d['nama_barang']." <b class='text-blue-600 font-black ml-1 bg-blue-50 px-1.5 py-0.5 rounded text-xs'>x".$d['jumlah']."</b></span>
+                                            <span class='text-slate-500 text-xs font-bold'>Rp ".number_format($d['subtotal'], 0, ',', '.')."</span>
+                                          </li>";
+                                }
+                            } else if (isset($t['detail_order']) && !empty($t['detail_order'])) {
+                                // Cek opsi 2: Jika tabel detail kosong, baca teks langsung dari kolom cadangan 'detail_order'
+                                $items = explode(",", $t['detail_order']);
+                                foreach ($items as $item) {
+                                    echo "<li class='bg-slate-50 p-2 rounded-lg border border-slate-100 font-bold capitalize text-slate-700 flex justify-between items-center'>
+                                            <span><i class='fas fa-check text-xs text-blue-500 mr-1.5'></i> ".trim($item)."</span>
+                                          </li>";
+                                }
+                            } else {
+                                // Jika dua-duanya kosong sama sekali
+                                echo "<li class='text-xs text-red-500 italic bg-red-50 p-2.5 rounded-lg text-center font-medium'>
+                                        <i class='fas fa-exclamation-triangle mr-1'></i> Data rincian menu kosong.
                                       </li>";
                             }
                             ?>
@@ -121,7 +137,7 @@ $role = $_SESSION['role'];
             fetch(`modules/transaksi/update_status.php?id=${idTransaksi}&status=Diproses`)
             .then(response => {
                 if (response.ok) {
-                    window.location.reload(); // Refresh cepat untuk memperbarui warna kartu menjadi 'Diproses'
+                    window.location.reload(); 
                 } else {
                     alert('Gagal memproses pesanan, silakan coba lagi.');
                 }
