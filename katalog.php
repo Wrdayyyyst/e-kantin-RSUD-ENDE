@@ -1,4 +1,5 @@
 <?php
+session_start(); // 1. TAMBAHAN: Mengaktifkan session pembeli
 include "config/db.php";
 /** @var mysqli $conn */
 ?>
@@ -44,11 +45,11 @@ include "config/db.php";
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nama Pemesan</label>
-                        <input type="text" id="nama_pemesan" placeholder="Contoh: Budi" class="w-full p-2 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
+                        <input type="text" id="nama_pemesan" oninput="simpanSesi()" placeholder="Contoh: Budi" class="w-full p-2 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500" autocomplete="off">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Nomor Meja</label>
-                        <input type="number" id="nomor_meja" placeholder="Contoh: 05" class="w-full p-2 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="number" id="nomor_meja" oninput="simpanSesi()" placeholder="Contoh: 05" class="w-full p-2 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                 </div>
             </div>
@@ -70,21 +71,14 @@ include "config/db.php";
                 }
 
                 while ($row = mysqli_fetch_array($query)) {
-                    
-                    // LOGIKA LINK GOOGLE/INTERNET:
-                    // Jika kolom foto di database ada isinya, langsung ambil link internet tersebut.
-                    // Jika kosong, pakai gambar salad default dari Unsplash.
-                    if (!empty($row['foto'])) {
-                        $url_gambar = $row['foto'];
-                    } else {
-                        $url_gambar = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60';
-                    }
+                    $nama_foto_otomatis = strtolower($row['nama_barang']) . '.jpg';
+                    $path_gambar = 'assest/img/' . $nama_foto_otomatis; 
                 ?>
                 
                 <div class="card-menu bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between hover:border-blue-400 hover:shadow-md transition duration-300">
                     
                     <div class="w-full h-36 bg-slate-100 relative overflow-hidden border-b border-slate-100 flex items-center justify-center">
-                        <img src="<?= $url_gambar; ?>" class="w-full h-full object-cover" alt="<?= $row['nama_barang']; ?>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=60';">
+                        <img src="<?= $path_gambar; ?>" class="w-full h-full object-cover" alt="<?= $row['nama_barang']; ?>" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80';">
                         
                         <span class="absolute top-2 right-2 bg-slate-900/70 backdrop-blur-xs text-[10px] font-bold text-white px-2 py-0.5 rounded-md">
                             Stok: <?= $row['stok']; ?>
@@ -158,11 +152,43 @@ include "config/db.php";
                 Dikembangkan oleh <span class="text-blue-600 font-bold">MAKN Ende</span> (PPLG)
             </p>
         </div>
-    </footer>
+    </footer >
+
+    <div id="notifSelesai" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-xl transform transition-all duration-300 scale-95">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-950 mb-2">Pesanan Siap Diambil! 🎉</h3>
+            <p class="text-sm text-gray-600 mb-4">Silakan menuju ke area kasir e-Kantin untuk mengambil pesanan Anda. Terima kasih!</p>
+            <button onclick="tutupNotif()" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition">
+                Oke, Saya Mengerti
+            </button>
+        </div>
+    </div>
 
     <script>
         let keranjangPelanggan = [];
         let totalBelanja = 0;
+
+        // 1. TAMBAHAN FINAL: Fungsi untuk menutup pop-up notifikasi saat diklik
+        function tutupNotif() {
+            document.getElementById("notifSelesai").classList.add("hidden");
+            // Kita nyalakan kembali pengecekan otomatisnya jika ingin terus memantau setelah ditutup
+            // Atau biarkan berhenti sesuai kebutuhan aplikasi kamu
+        }
+
+        // Fungsi AJAX kirim data nama & meja ke server secara real-time
+        function simpanSesi() {
+            let nama = document.getElementById('nama_pemesan').value;
+            let meja = document.getElementById('nomor_meja').value;
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "save_session.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.send("nama=" + encodeURIComponent(nama) + "&meja=" + encodeURIComponent(meja));
+        }
 
         function tambahPorsi(id_barang, nama, harga, stokMax) {
             const namaInput = document.getElementById('nama_pemesan').value.trim();
@@ -326,6 +352,31 @@ include "config/db.php";
                 }
             }
         }
+
+        // Fungsi cek status real-time tiap 2 detik
+        let cekInterval = setInterval(function() {
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", "cek_status.php", true);
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    let debugBox = document.getElementById('debug-status');
+                    let respon = xhr.responseText.trim();
+                    
+                    // Supaya tidak error jika elemen debugBox belum dipasang di HTML
+                    if (debugBox) {
+                        debugBox.innerText = "Status Server: " + respon;
+                    }
+
+                    if (respon === "Selesai") {
+                        document.getElementById("notifSelesai").classList.remove("hidden");
+                        clearInterval(cekInterval); 
+                    }
+                }
+            };
+            xhr.send();
+        }, 2000);
     </script>
+
 </body>
 </html>
