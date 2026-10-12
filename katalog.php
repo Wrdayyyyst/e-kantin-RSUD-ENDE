@@ -15,8 +15,21 @@ include "config/db.php";
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
+    <!-- TAMBAHAN: BANNER NOTIFIKASI KECIL DI ATAS (PERSISTENT BANNER) -->
+    <div id="bannerStatusSelesai" class="hidden bg-emerald-600 text-white px-4 py-2.5 shadow-md sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 text-xs font-bold">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-bell text-amber-300 text-sm animate-bounce"></i>
+                <span>PESANAN SIAP: Pesanan Anda sudah selesai disiapkan! Silakan ambil di kasir/dapur.</span>
+            </div>
+            <button onclick="tutupBanner()" class="bg-emerald-800 hover:bg-emerald-900 px-2 py-1 rounded text-[10px] uppercase font-bold tracking-wider text-emerald-100 flex-shrink-0">
+                Tutup
+            </button>
+        </div>
+    </div>
+
     <div class="flex-grow">
-        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md sticky top-0 z-50 px-4 py-5 text-center rounded-b-2xl max-w-7xl mx-auto w-full">
+        <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white shadow-md sticky top-0 z-40 px-4 py-5 text-center rounded-b-2xl max-w-7xl mx-auto w-full">
             <h1 class="text-2xl font-black tracking-wide flex items-center justify-center gap-2 uppercase">
                 <i class="fas fa-utensils"></i> e-Kantin RSUD Ende
             </h1>
@@ -152,7 +165,7 @@ include "config/db.php";
                 Dikembangkan oleh <span class="text-blue-600 font-bold">MAKN Ende</span> (PPLG)
             </p>
         </div>
-    </footer >
+    </footer>
 
     <div id="notifSelesai" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-lg p-6 max-w-sm w-full text-center shadow-xl transform transition-all duration-300 scale-95">
@@ -173,14 +186,54 @@ include "config/db.php";
         let keranjangPelanggan = [];
         let totalBelanja = 0;
 
-        // 1. TAMBAHAN FINAL: Fungsi untuk menutup pop-up notifikasi saat diklik
-        function tutupNotif() {
-            document.getElementById("notifSelesai").classList.add("hidden");
-            // Kita nyalakan kembali pengecekan otomatisnya jika ingin terus memantau setelah ditutup
-            // Atau biarkan berhenti sesuai kebutuhan aplikasi kamu
+        // -------------------------------------------------------------
+        // TAMBAHAN FITUR NOTIFIKASI SYSTEM / BROWSER & BANNER PERSISTENT
+        // -------------------------------------------------------------
+        
+        // Meminta izin notifikasi HP/Browser saat halaman pertama kali dibuka
+        document.addEventListener("DOMContentLoaded", function() {
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
+            // Cek apakah sebelumnya pesanan sudah selesai (tersimpan di localStorage)
+            if (localStorage.getItem("statusPesanan") === "Selesai") {
+                tampilkanBannerAtas();
+            }
+        });
+
+        function kirimNotifikasiHP() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Pesanan Siap Diambil! 🎉", {
+                    body: "Pesanan Anda di e-Kantin RSUD Ende sudah selesai disiapkan. Silakan ambil di kasir!",
+                    icon: "https://cdn-icons-png.flaticon.com/512/3170/3170733.png"
+                });
+            }
         }
 
-        // Fungsi AJAX kirim data nama & meja ke server secara real-time
+        function tampilkanBannerAtas() {
+            const banner = document.getElementById("bannerStatusSelesai");
+            if (banner) {
+                banner.classList.remove("hidden");
+            }
+        }
+
+        function tutupBanner() {
+            const banner = document.getElementById("bannerStatusSelesai");
+            if (banner) {
+                banner.classList.add("hidden");
+            }
+            localStorage.removeItem("statusPesanan"); // Hapus status setelah ditutup manual
+        }
+
+        function tutupNotif() {
+            document.getElementById("notifSelesai").classList.add("hidden");
+        }
+
+        // -------------------------------------------------------------
+        // KODE LAMA (TIDAK ADA YANG DIUBAH / TETAP RELEVAN)
+        // -------------------------------------------------------------
+
         function simpanSesi() {
             let nama = document.getElementById('nama_pemesan').value;
             let meja = document.getElementById('nomor_meja').value;
@@ -353,7 +406,7 @@ include "config/db.php";
             }
         }
 
-        // Fungsi cek status real-time tiap 2 detik
+        // PERBAIKAN PADA PENGECEKAN STATUS REAL-TIME
         let cekInterval = setInterval(function() {
             let xhr = new XMLHttpRequest();
             xhr.open("GET", "cek_status.php", true);
@@ -363,13 +416,23 @@ include "config/db.php";
                     let debugBox = document.getElementById('debug-status');
                     let respon = xhr.responseText.trim();
                     
-                    // Supaya tidak error jika elemen debugBox belum dipasang di HTML
                     if (debugBox) {
                         debugBox.innerText = "Status Server: " + respon;
                     }
 
                     if (respon === "Selesai") {
+                        // 1. Tampilkan Pop-up Modal (Bawaan Lama)
                         document.getElementById("notifSelesai").classList.remove("hidden");
+                        
+                        // 2. TAMBAHAN: Munculkan Notifikasi Sistem HP / Status Bar
+                        kirimNotifikasiHP();
+
+                        // 3. TAMBAHAN: Tampilkan Banner Notif di Atas Halaman
+                        tampilkanBannerAtas();
+
+                        // 4. Simpan status di browser agar ketika halaman di-refresh banner tetap ada
+                        localStorage.setItem("statusPesanan", "Selesai");
+
                         clearInterval(cekInterval); 
                     }
                 }
