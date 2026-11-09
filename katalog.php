@@ -121,6 +121,13 @@ include "config/db.php";
                 </div>
                 <?php } ?>
             </div>
+
+            <!-- TAMBAHAN: Pesan jika menu yang dicari tidak ditemukan -->
+<div id="pesanKosong" class="hidden col-span-full bg-white rounded-xl p-8 text-center border border-slate-200 shadow-sm my-4">
+    <i class="fas fa-search-minus text-slate-300 text-4xl mb-3"></i>
+    <p class="text-slate-500 font-medium text-sm">Tidak terdapat menu tersebut.</p>
+</div>
+
         </main>
     </div>
 
@@ -392,19 +399,29 @@ include "config/db.php";
         }
 
         function cariMenu() {
-            let kataKunci = document.getElementById('searchMenu').value.toLowerCase();
-            let daftarKartu = document.getElementsByClassName('card-menu');
-            
-            for (let i = 0; i < daftarKartu.length; i++) {
-                let namaMakanan = daftarKartu[i].getElementsByClassName('nama-menu')[0].innerText.toLowerCase();
-                
-                if (namaMakanan.includes(kataKunci)) {
-                    daftarKartu[i].style.display = "flex"; 
-                } else {
-                    daftarKartu[i].style.display = "none"; 
-                }
-            }
+    let kataKunci = document.getElementById('searchMenu').value.toLowerCase();
+    let daftarKartu = document.getElementsByClassName('card-menu');
+    let pesanKosong = document.getElementById('pesanKosong');
+    let jumlahDitemukan = 0;
+    
+    for (let i = 0; i < daftarKartu.length; i++) {
+        let namaMakanan = daftarKartu[i].getElementsByClassName('nama-menu')[0].innerText.toLowerCase();
+        
+        if (namaMakanan.includes(kataKunci)) {
+            daftarKartu[i].style.display = "flex"; 
+            jumlahDitemukan++;
+        } else {
+            daftarKartu[i].style.display = "none"; 
         }
+    }
+
+    // Menampilkan atau menyembunyikan pesan "Tidak terdapat menu tersebut"
+    if (jumlahDitemukan === 0) {
+        pesanKosong.classList.remove('hidden');
+    } else {
+        pesanKosong.classList.add('hidden');
+    }
+}
 
         // PERBAIKAN PADA PENGECEKAN STATUS REAL-TIME
         let cekInterval = setInterval(function() {
